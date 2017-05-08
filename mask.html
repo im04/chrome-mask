@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
 <style>
     html,body {
         height: 100%;
@@ -10,84 +11,91 @@
     }
 </style>
 <body>
-    <div style="background-color: red;"></div>
-    <div id="test" style="background-color: white;position: absolute;top:0;left:0;right:0;bottom:0;color:white;z-index: 1;"></div>
-    <div style="background-color: green;position: absolute;top:20%;left:10%;bottom: 20%;right:10%;z-index: 2;"></div>
-    <div style="background-color: blue;position: absolute;top:50%;left: 30%;width: 40%;height: 300px;z-index: 3;"></div>
-    <div id="div" style="background-color: yellow;position: absolute;top:0%;left: 0%;width: 30%;height: 202px;z-index: 4;"></div>
-    <script>
+<div style="background-color: red;"></div>
+<div id="test" style="background-color: white;position: absolute;top:0;left:0;right:0;bottom:0;color:white;z-index: 1;"></div>
+<div style="background-color: green;position: absolute;top:20%;left:10%;bottom: 20%;right:10%;z-index: 2;"></div>
+<div style="background-color: blue;position: absolute;top:50%;left: 30%;width: 40%;height: 300px;z-index: 3;"></div>
+<div id="div" style="background-color: yellow;position: absolute;top:0%;left: 0%;width: 30%;height: 202px;z-index: 4;"></div>
+<div id="div1" style="background-color: gainsboro;position: absolute;top:0%;left: 0%;width: 30%;height: 202px;z-index: 4;"></div>
+<div id="div2" style="background-color: darkblue;position: absolute;top:0%;left: 0%;width: 30%;height: 202px;z-index: 4;"></div>
+<div id="div3" style="background-color: #000000;position: absolute;top:0%;left: 0%;width: 30%;height: 202px;z-index: 4;"></div>
+<div id="div4" style="background-color: #00a6cf;position: absolute;top:0%;left: 0%;width: 30%;height: 202px;z-index: 4;"></div>
+<script>
 
-        //div.style.webkitMaskImage = '--gradient(radial,50% 50%, 50 , 50% 50% , 51 ,from(rgba(255,255,255,0)),to(black))';
-        function maskBox (time, startPoint, endPoint) {
-            this.list = [];
-            this.startPoint = startPoint||0;
-            this.endPoint = endPoint||false;
-            this.time = time||600;
-        }
-        maskBox.prototype = {
-            checkEl: function(el) {
-                var flag = el !== document.documentElement && el !== document.body&&!(~this.list.indexOf(el));
-                return flag;
-            },
-            setR: function (x, y, el) {
-                var Rect = el.getBoundingClientRect();
-                this.list.push(el);
-                this.el =el;
-                this.elStyle = el.style;
-                this.r = this.countR(x, y, Math.ceil(Rect.width), Math.ceil(Rect.height));
-                return this;
-            },
-            countR: function(x, y, width, height) {
-                  var y2Top = y,
-                      y2Bottom = height - y,
-                      x2Left = x,
-                      x2Right = width- x;
-                return (Math.sqrt(Math.pow(Math.max(x2Left, x2Right), 2)+Math.pow(Math.max(y2Top, y2Bottom),2)));
-            },
-            render: function(x, y, r) {
-                var xy = x + ' ' + y;
-                this.elStyle.webkitMaskImage = '-webkit-gradient(radial,'+ xy + ',' + r + ','+ xy + ',' + (r*1.5) + ',from(rgba(255,255,255,0)),to(black))';
-            },
-            ani: function(x, y, start, end, time) {
-                var self = this,
-                    start = start||0,
-                    end = Math.ceil(end||0),
-                    startTime = new Date().getTime(),
-                    endTime = startTime+time;
-                function ani() {
-                    var now = new Date().getTime(),
-                        //nowR = (start + (now - startTime)/time)*end;
-                        nowR = Math.ceil(bser(now-startTime, start, end, time));
-                    if (now >= endTime) {
-                        self.render(x, y, end);
-                        self.hide();
-                    } else {
-                        self.render(x, y, nowR);
-                        requestAnimationFrame(ani);
-                    }
+    //div.style.webkitMaskImage = '--gradient(radial,50% 50%, 50 , 50% 50% , 51 ,from(rgba(255,255,255,0)),to(black))';
+    //        div.style.webkitMaskImage = '-webkit-radial-gradient(15px 15px,circle , rgba(0,0,0,0) 0, rgba(0,0,0,0) 50px, black 51px)';
+    function maskBox (target, x, y, time) {
+        this.el = target;
+        this.elStyle = target.style;
+        this.x = x||0;
+        this.y = y||0;
+        this.time = time||600;
+        this.setR();
+    }
+    maskBox.prototype = {
+        checkEl: function() {
+            return this.el !== document.documentElement && this.el !== document.body;
+        },
+        setR: function () {
+            var Rect = this.el.getBoundingClientRect();
+            this.r = this.countR(this.x, this.y, Math.ceil(Rect.width), Math.ceil(Rect.height));
+//                console.log(this.r);
+//                console.log((Math.sqrt(Math.pow(this.height, 2)+Math.pow(this.width,2))));
+            return this;
+        },
+        countR: function(x, y, width, height) {
+            var y2Top = y,
+                y2Bottom = height - y,
+                x2Left = x,
+                x2Right = width- x;
+            return (Math.sqrt(Math.pow(Math.max(x2Left, x2Right), 2)+Math.pow(Math.max(y2Top, y2Bottom),2)));
+        },
+        render: function(x, y, r) {
+            var xy = x + 'px ' + y + 'px';
+            //radial-gradient(100px circle , white 0px, white 36px, black 117px, black 100px)
+            //this.elStyle.webkitMaskImage = '-webkit-gradient(radial,'+ xy + ',' + r + ','+ xy + ',' + (r*1.5) + ',from(rgba(255,255,255,0)),to(black))';
+            this.elStyle.webkitMaskImage = '-webkit-radial-gradient(' + xy + ',circle , rgba(0,0,0,0) 0, rgba(0,0,0,0) '+ r +'px, black ' + (r*1.4) + 'px)';
+        },
+        ani: function(x, y, start, end) {
+            var self = this,
+                time = this.time,
+                start = start||0,
+                end = Math.ceil(end||0),
+                startTime = new Date().getTime(),
+                endTime = startTime + time;
+            function ani() {
+                var now = new Date().getTime(),
+                    //nowR = (start + (now - startTime)/time)*end;
+                    nowR = Math.ceil(bser(now-startTime, start, end, time));
+                if (now >= endTime) {
+                    self.render(x, y, end);
+                    self.hide();
+                } else {
+                    self.render(x, y, nowR);
+                    requestAnimationFrame(ani);
                 }
-                ani();
-            },
-            hide: function () {
-                var index = this.list.indexOf(this.el);
-                this.el.style.display = 'none';
-                this.el.style.webkitMaskImage = '';
-                this.list.splice(index, 1);
-            },
-            start: function (x, y , el) {
-                this.checkEl(el)&&this.setR(x, y, el).ani(x, y, this.startPoint, this.endPoint||this.r, this.time);
             }
-        };
-        function bser(t,b,c,d) {
-            return c*(t/=d)*t + b;
+            ani();
+        },
+        hide: function () {
+            this.elStyle.display = 'none';
+            this.elStyle.webkitMaskImage = '';
+        },
+        startHide: function () {
+            this.checkEl()&&this.ani(this.x, this.y, 0, this.r);
         }
-        var maskEl = new maskBox();
-        window.onclick = function (e) {
-            var target =e.target,
-                x = parseInt(e.pageX-target.offsetLeft),
-                y = parseInt(e.pageY-target.offsetTop);
-            maskEl.start(x, y, target);
-        };
-    </script>
+    };
+    function bser(t,b,c,d) {
+        return c*(t/=d)*t + b;
+    }
+
+    window.onclick = function (e) {
+        var target =e.target,
+            x = parseInt(e.pageX - target.offsetLeft),
+            y = parseInt(e.pageY - target.offsetTop);
+        var maskEl = new maskBox(target, x, y);
+        maskEl.startHide();
+    };
+</script>
 </body>
 </html>
